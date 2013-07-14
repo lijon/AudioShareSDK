@@ -1,8 +1,7 @@
 AudioShare SDK
 ==============
 
-This SDK will let you export audio to the AudioShare app for iPhone, iPad and iPod touch.
-It can transfer soundfiles from memory or from file.
+This SDK will let you export audio to, or import audio from, the AudioShare app for iPhone, iPad and iPod touch.
 
 AudioShare - audio document manager, is a simple tool to manage all your sounds in a single
 place on your device, with easy transferring of sounds between AudioShare and other apps or
@@ -10,9 +9,14 @@ your computer. Read more about it here: http://kymatica.com/audioshare
 
 Usage
 -----
-
 First, copy the files `AudioShareSDK.h` and `AudioShareSDK.m` into your project.
 
+Don't forget to import the header:
+
+    #import "AudioShareSDK.h"
+
+Export to AudioShare
+--------------------
 The typical usage is to have a button or menu item labelled "Export to AudioShare" that
 transfers a soundfile from your own app into AudioShare. Just put the following line in
 the code that gets called when the user taps the button:
@@ -27,9 +31,34 @@ These methods will check that a recent enough version of AudioShare is installed
 present the user with the option to view the app on the App Store. If AudioShare was installed,
 it will open AudioShare and import the audio, and return YES if successfull.
 
-Don't forget to import the header:
+Import from AudioShare
+----------------------
+Since AudioShare version 2.5, you can also easily import sound from AudioShare into your own app.
 
-    #import "AudioShareSDK.h"
+1. First, declare a new URL type in your Info.plist with the scheme `yourAppName.audioshare`. Replace yourAppName with a unique name for your app, but keep the `.audioshare` suffix.
+
+2. Then, in your app delegates openURL handler method, call `checkPendingImport:withBlock:` to handle the import:
+
+        if([[AudioShare sharedInstance] checkPendingImport:url withBlock:^(NSString *path) {
+
+          // Move the temporary file into our Documents folder
+          NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+          NSString *documentsDirectory = [paths objectAtIndex:0];
+          NSString *destination = [documentsDirectory stringByAppendingPathComponent:[path lastPathComponent]];
+          [[NSFileManager defaultManager] moveItemAtPath:path toPath:destination error:nil];
+
+          // Load the imported file
+          [mySoundEngine loadSample:destination];
+
+        }]) {
+          return YES;
+        }
+
+3. To initiate the import from your app, add a button named "Import from AudioShare" which simply calls:
+
+        [[AudioShare sharedInstance] initiateSoundImport];
+    
+This will launch AudioShare (if version 2.5 or later is installed), which will display an "Import into app: YourAppName" button. When the user taps this button in AudioShare, it will launch your application where the call to `checkPendingImport:withBlock:` will grab the imported soundfile.
 
 Supported formats
 -----------------
@@ -40,9 +69,10 @@ License
 -------
 
 You are free to incorporate this code in your own application, for the purpose of launching
-and/or transferring sounds to the AudioShare app.
+and/or transferring sounds to/from the AudioShare app.
 
 If you do, I would appreciate if you drop me a message at lijon@kymatica.com
 
-Copyright (C)2012 Jonatan Liljedahl
+Copyright (C)2012-2013 Jonatan Liljedahl
+
 http://kymatica.com
