@@ -60,10 +60,19 @@ Since AudioShare version 2.5, you can also easily import sound from AudioShare i
     
 This will launch AudioShare (if version 2.5 or later is installed), which will display an "Import into app: YourAppName" button. When the user taps this button in AudioShare, it will launch your application where the call to `checkPendingImport:withBlock:` will grab the imported soundfile.
 
+Multithreading
+--------------
+The addSoundFrom* and initiateSoundImport methods should always be called from the main thread. If you need to call it from another thread, you must wrap the call in a block dispatched on the main thread. Example:
+
+        dispatch_async(dispatch_get_main_queue(), ^(void) {
+            [[AudioShare sharedInstance] addSoundFromURL:theUrlToYourFile
+                                                withName:@"My Sound"];
+        });
+
 Supported formats
 -----------------
 
-AudioShare supports all soundfile formats, bit depths and rates, that has built-in support in iOS: AIFF, AIFC, WAVE, SoundDesigner2, Next, MP3, MP2, MP1, AC3, AAC_ADTS, MPEG4, M4A, CAF, 3GP, 3GP2, AMR.
+AudioShare supports all soundfile formats, bit depths and rates, that has built-in support in iOS: AIFF, AIFC, WAVE, SoundDesigner2, Next, MP3, MP2, MP1, AC3, AAC_ADTS, MPEG4, M4A, CAF, 3GP, 3GP2, AMR. Additionally, it supports standard MIDI files.
 
 License
 -------
