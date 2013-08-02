@@ -76,6 +76,11 @@
     return [self addSoundFromData:dataFile withName:name];
 }
 
+- (BOOL)addSoundFromPath:(NSString*)path withName:(NSString*)name {
+    NSData *dataFile = [NSData dataWithContentsOfMappedFile:path];
+    return [self addSoundFromData:dataFile withName:name];
+}
+
 - (NSString*)findCallbackScheme {
     NSBundle* mainBundle = [NSBundle mainBundle];
     NSArray* cfBundleURLTypes = [mainBundle objectForInfoDictionaryKey:@"CFBundleURLTypes"];

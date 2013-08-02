@@ -21,7 +21,7 @@ The typical usage is to have a button or menu item labelled "Export to AudioShar
 transfers a soundfile from your own app into AudioShare. Just put the following line in
 the code that gets called when the user taps the button:
 
-    [[AudioShare sharedInstance] addSoundFromURL:theUrlToYourFile withName:@"My Sound"];
+    [[AudioShare sharedInstance] addSoundFromPath:thePathToYourFile withName:@"My Sound"];
 
 In case you have your sound in memory, you can send an NSData instead:
 
