@@ -72,11 +72,20 @@
 
 - (BOOL)addSoundFromURL:(NSURL*)url withName:(NSString*)name {
     NSString *srcPath = [url path];
-    NSData *dataFile = [NSData dataWithContentsOfMappedFile:srcPath];
-    return [self addSoundFromData:dataFile withName:name];
+    return [self addSoundFromPath:srcPath withName:name];
 }
 
 - (BOOL)addSoundFromPath:(NSString*)path withName:(NSString*)name {
+    if(![[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Sorry"
+                                                    message:@"The file does not exist!"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+        [a show];
+        [a release];
+        return NO;
+    }
     NSData *dataFile = [NSData dataWithContentsOfMappedFile:path];
     return [self addSoundFromData:dataFile withName:name];
 }
