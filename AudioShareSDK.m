@@ -17,7 +17,8 @@
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     if(buttonIndex != alertView.cancelButtonIndex) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://itunes.apple.com/us/app/audioshare-audio-document/id543859300?ls=1&mt=8"]];
+        //        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://itunes.apple.com/app/id543859300?mt=8"]];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
     }
 }
 
