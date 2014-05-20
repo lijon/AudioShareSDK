@@ -146,7 +146,7 @@
 		return nil;
 	NSArray *items = [board dataForPasteboardType:(NSString *) kUTTypeAudio inItemSet:set];
 	if (items) {
-		UInt32 cnt = [items count];
+		UInt32 cnt = (UInt32)[items count];
 		if (!cnt)
 			return nil;
 		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
