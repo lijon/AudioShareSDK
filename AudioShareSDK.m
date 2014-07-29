@@ -17,7 +17,6 @@
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     if(buttonIndex != alertView.cancelButtonIndex) {
-        //        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://itunes.apple.com/app/id543859300?mt=8"]];
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
     }
 }
@@ -146,7 +145,7 @@
 		return nil;
 	NSArray *items = [board dataForPasteboardType:(NSString *) kUTTypeAudio inItemSet:set];
 	if (items) {
-		UInt32 cnt = (UInt32)[items count];
+		NSUInteger cnt = [items count];
 		if (!cnt)
 			return nil;
 		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
@@ -155,7 +154,7 @@
 		NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
 		if (!handle)
 			return nil;
-		for (UInt32 i = 0; i < cnt; i++)
+		for (NSUInteger i = 0; i < cnt; i++)
 			[handle writeData:[items objectAtIndex:i]];
 		[handle closeFile];
         return path;
