@@ -19,12 +19,17 @@ For ARC-enabled projects, such as new Xcode 6 projects
 ------------------------------------------------------
 You must disable ARC for the `AudioShareSDK.m` file, or else your project will return errors and fail to build and run.
 
-    1. Select the project in the left-hand Project Navigator tree.
-    2. Click on the "Build Phases" tab at the top.
-    3. Click on "Compiler Sources" category to open the accordian arrow and show the enclosed files.
-    4. Select to highlight the `AudioShareSDK.m` file.
-    5. Double-click on the right-hand side of the selected row, under the "Compiler Flags" column.
-    6. Type: '-fno-objc-arc' (without the single quotes) into the field, and press the return key to commit the new compiler source flag.
+1. Select the project in the left-hand Project Navigator tree.
+
+2. Click on the "Build Phases" tab at the top.
+
+3. Click on "Compiler Sources" category to open the accordian arrow and show the enclosed files.
+
+4. Select to highlight the `AudioShareSDK.m` file.
+
+5. Double-click on the right-hand side of the selected row, under the "Compiler Flags" column.
+
+6. Type: '-fno-objc-arc' (without the single quotes) into the field, and press the return key to commit the new compiler source flag.
 
 Export to AudioShare
 --------------------
