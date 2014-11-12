@@ -29,7 +29,7 @@ You must disable ARC for the `AudioShareSDK.m` file, or else your project will r
 
 5. Double-click on the right-hand side of the selected row, under the "Compiler Flags" column.
 
-6. Type: '-fno-objc-arc' (without the single quotes) into the field, and press the return key to commit the new compiler source flag.
+6. Type: `-fno-objc-arc` into the field, and press the return key to commit the new compiler source flag.
 
 Export to AudioShare
 --------------------
