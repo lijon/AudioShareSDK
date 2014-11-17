@@ -2,6 +2,7 @@
 // Copyright (C)2012 Jonatan Liljedahl
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface AudioShare : NSObject <UIAlertViewDelegate>
 
