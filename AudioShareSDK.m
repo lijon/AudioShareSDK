@@ -86,7 +86,7 @@
         
         return NO;
     }
-    NSData *dataFile = [NSData dataWithContentsOfMappedFile:path];
+    NSData *dataFile = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:path] options:NSDataReadingMappedIfSafe error:NULL];
     return [self addSoundFromData:dataFile withName:name];
 }
 
