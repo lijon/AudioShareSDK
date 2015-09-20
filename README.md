@@ -15,9 +15,21 @@ Don't forget to import the header:
 
     #import "AudioShareSDK.h"
 
-For ARC-enabled projects, such as new Xcode 6 projects
-------------------------------------------------------
-You must disable ARC for the `AudioShareSDK.m` file, or else your project will return errors and fail to build and run.
+iOS 9 Support
+-------------
+Since iOS 9, apps must whitelist URL schemes to allow quering them with canOpenURL, which this SDK does.
+
+For your app to work with this SDK on iOS 9, you *must* add the following entry to your `Info.plist`:
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>audioshare.import</string>
+        <string>audiosharecmd</string>
+    </array>
+
+AudioShare SDK now uses ARC
+---------------------------
+If your project is not ARC-enabled, you'll need to enable ARC for `AudioShareSDK.m`:
 
 1. Select the project in the left-hand Project Navigator tree.
 
@@ -29,7 +41,7 @@ You must disable ARC for the `AudioShareSDK.m` file, or else your project will r
 
 5. Double-click on the right-hand side of the selected row, under the "Compiler Flags" column.
 
-6. Type: `-fno-objc-arc` into the field, and press the return key to commit the new compiler flag.
+6. Type: `-fobjc-arc` into the field, and press the return key to commit the new compiler flag.
 
 Export to AudioShare
 --------------------
@@ -96,8 +108,8 @@ License
 You are free to incorporate this code in your own application, for the purpose of launching
 and/or transferring sounds to/from the AudioShare app.
 
-If you do, I would appreciate if you drop me a message at lijon@kymatica.com
+If you do, please drop me a message at info@kymatica.com so that I can add your app to the list of implementing apps on http://kymatica.com/audioshare
 
-Copyright (C)2012-2014 Jonatan Liljedahl
+Copyright (C)2012-2015 Jonatan Liljedahl
 
 http://kymatica.com
