@@ -22,13 +22,13 @@
 }
 
 - (NSString*)escapeString:(NSString*)string {
-    NSString *s = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+    NSString *s = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
                                                                       NULL,
                                                                       (CFStringRef)string,
                                                                       NULL,
                                                                       (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                                      CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-    return [s autorelease];    
+                                                                      CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding)));
+    return s;
 }
 
 - (BOOL)addSoundFromData:(NSData*)data withName:(NSString*)name {
@@ -41,7 +41,7 @@
                                           cancelButtonTitle:@"Cancel"
                                           otherButtonTitles:@"Continue", nil];
         [a show];
-        [a release];
+        
         return NO;
     }
     UIPasteboard *board = [UIPasteboard generalPasteboard];
@@ -52,7 +52,7 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
         [a show];
-        [a release];
+        
         return NO;
     }
     NSUInteger sz = [data length];
@@ -83,10 +83,10 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
         [a show];
-        [a release];
+        
         return NO;
     }
-    NSData *dataFile = [NSData dataWithContentsOfMappedFile:path];
+    NSData *dataFile = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:path] options:NSDataReadingMappedIfSafe error:NULL];
     return [self addSoundFromData:dataFile withName:name];
 }
 
@@ -119,7 +119,7 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
         [a show];
-        [a release];
+        
         return NO;
     }
     NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audioshare.import://%@",callback]];
@@ -130,7 +130,7 @@
                                           cancelButtonTitle:@"Cancel"
                                           otherButtonTitles:@"Continue", nil];
         [a show];
-        [a release];
+        
         return NO;
     }
 
@@ -174,7 +174,7 @@
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
             [a show];
-            [a release];
+            
             return NO;
         }
         block(path);
