@@ -114,7 +114,7 @@
     NSString *callback = [self findCallbackScheme];
     if(!callback) {
         UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Missing callback URL"
-                                                    message:@"Developer: This app does not expose the needed appname.audioshare:// callback URL!"
+                                                    message:@"Hello developer. This app does not expose the needed appname.audioshare:// callback URL!"
                                                    delegate:nil
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
@@ -181,6 +181,24 @@
         return YES;
     } else {
         return NO;
+    }
+}
+
++ (void)load {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidLaunch) name:UIApplicationDidFinishLaunchingNotification object:nil];
+}
+
++ (void)appDidLaunch {
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSDictionary *info = bundle.infoDictionary;
+    NSArray *list = info[@"LSApplicationQueriesSchemes"];
+    if(!([list containsObject:@"audioshare.import"] && [list containsObject:@"audiosharecmd"])) {
+        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Missing URL schemes in whitelist!"
+                                                    message:@"Hello developer. This app does not whitelist the AudioShare URL schemes, needed for iOS 9. See instructions at http://github.com/lijon/AudioShareSDK"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+        [a show];
     }
 }
 
