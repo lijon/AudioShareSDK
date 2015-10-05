@@ -17,7 +17,7 @@ Don't forget to import the header:
 
 iOS 9 Support
 -------------
-Since iOS 9, apps must whitelist URL schemes to allow quering them with canOpenURL, which this SDK does.
+Since iOS 9, apps must whitelist URL schemes to allow querying them with canOpenURL, which this SDK does.
 
 For your app to work with this SDK on iOS 9, you *must* add the following entry to your `Info.plist`:
 
