@@ -19,4 +19,7 @@ typedef void(^AudioShareImportBlock)(NSString *path);
 - (BOOL) initiateSoundImport;
 - (BOOL) checkPendingImport:(NSURL*)url withBlock:(AudioShareImportBlock)block;
 
+// Convenience utility that returns filename extension for path if it's an audio or midi file
++ (NSString*)findFileType:(NSString*)path;
+
 @end

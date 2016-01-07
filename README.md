@@ -59,6 +59,8 @@ These methods will check that a recent enough version of AudioShare is installed
 present the user with the option to view the app on the App Store. If AudioShare was installed,
 it will open AudioShare and import the audio, and return YES if successfull.
 
+If AudioShare was not installed, it will just copy the audio to the general pasteboard.
+
 Import from AudioShare
 ----------------------
 Since AudioShare version 2.5, you can also easily import sound from AudioShare into your own app.
@@ -87,6 +89,8 @@ Since AudioShare version 2.5, you can also easily import sound from AudioShare i
         [[AudioShare sharedInstance] initiateSoundImport];
     
 This will launch AudioShare (if version 2.5 or later is installed), which will display an "Import into app: YourAppName" button. When the user taps this button in AudioShare, it will launch your application where the call to `checkPendingImport:withBlock:` will grab the imported soundfile.
+
+If AudioShare was not installed, it will just paste audio from the general pasteboard, and then call your callback URL. The pasted audio will thus be handled in your `checkPendingImport` as usual. The filename will be "PastedAudio" with suitable path extension added depending on the file type.
 
 Multithreading
 --------------

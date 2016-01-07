@@ -3,6 +3,7 @@
 
 #import "AudioShareSDK.h"
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 #define BM_CLIPBOARD_CHUNK_SIZE (5 * 1024 * 1024)
 
@@ -32,18 +33,6 @@
 }
 
 - (BOOL)addSoundFromData:(NSData*)data withName:(NSString*)name {
-    name = [self escapeString:name];
-    NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audiosharecmd://addFromPaste?%@",name]];
-    if(![[UIApplication sharedApplication] canOpenURL:asURL]) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"AudioShare"
-                                                    message:@"AudioShare - audio document manager, version 2.1 or later is not installed on this device. You can get it on the App Store."
-                                                   delegate:self
-                                          cancelButtonTitle:@"Cancel"
-                                          otherButtonTitles:@"Continue", nil];
-        [a show];
-        
-        return NO;
-    }
     UIPasteboard *board = [UIPasteboard generalPasteboard];
     if (!data) {
         UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Sorry"
@@ -67,6 +56,18 @@
         [items addObject:dict];
     }
     board.items = items;
+
+    name = [self escapeString:name];
+    NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audiosharecmd://addFromPaste?%@",name]];
+    if(![[UIApplication sharedApplication] canOpenURL:asURL]) {
+        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"AudioShare"
+                                                    message:@"Audio was copied to pasteboard and can now be pasted in other apps.\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"Continue", nil];
+        [a show];
+        return NO;
+    }
     return [[UIApplication sharedApplication] openURL:asURL];
 }
 
@@ -124,14 +125,22 @@
     }
     NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audioshare.import://%@",callback]];
     if(![[UIApplication sharedApplication] canOpenURL:asURL]) {
+        UIPasteboard *board = [UIPasteboard generalPasteboard];
+        NSArray *typeArray = @[(NSString *) kUTTypeAudio];
+        NSIndexSet *set = [board itemSetWithPasteboardTypes:typeArray];
+        BOOL hasAudio = [board containsPasteboardTypes:typeArray inItemSet:set];
+
         UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"AudioShare"
-                                                    message:@"AudioShare - audio document manager, version 2.5 or later is not installed on this device. You can get it on the App Store."
+                                                    message:[hasAudio?@"Audio was pasted from pasteboard.":@"No audio in pasteboard." stringByAppendingString:@"\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."]
                                                    delegate:self
                                           cancelButtonTitle:@"Cancel"
                                           otherButtonTitles:@"Continue", nil];
         [a show];
-        
-        return NO;
+
+        if(hasAudio)
+            asURL = [NSURL URLWithString:[callback stringByAppendingString:@"://PastedAudio"]];
+        else
+            return NO;
     }
 
     return [[UIApplication sharedApplication] openURL:asURL];
@@ -149,6 +158,7 @@
 		if (!cnt)
 			return nil;
 		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
 		if (![[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil])
             return nil;
 		NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
@@ -157,6 +167,16 @@
 		for (NSUInteger i = 0; i < cnt; i++)
 			[handle writeData:[items objectAtIndex:i]];
 		[handle closeFile];
+
+        if(![[filename pathExtension] length]) {
+            NSString *ext = [AudioShare findFileType:path];
+            if(ext) {
+                NSString *newPath = [path stringByAppendingPathExtension:ext];
+                if([[NSFileManager defaultManager] moveItemAtPath:path toPath:newPath error:nil])
+                    path = newPath;
+            }
+        }
+
         return path;
 	}
     return nil;
@@ -199,6 +219,53 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
         [a show];
+    }
+}
+
++ (BOOL)fileIsMIDI:(NSString*)path {
+    const char *cpath = [path fileSystemRepresentation];
+    FILE *fp = fopen(cpath,"r");
+    if(fp) {
+        char buf[5];
+        fread(buf,1,4,fp);
+        fclose(fp);
+        buf[4]='\0';
+        if(strcmp(buf, "MThd")==0)
+            return YES;
+    }
+    return NO;
+}
+
++ (NSString*)findFileType:(NSString*)path {
+    if([self fileIsMIDI:path])
+        return @"mid";
+    NSURL *audioFileURL = [NSURL fileURLWithPath:path];
+    AudioFileID af = NULL;
+    AudioFileOpenURL((__bridge CFURLRef)audioFileURL, kAudioFileReadPermission, 0, &af);
+    if(!af) return nil;
+    AudioFileTypeID typeID;
+    UInt32 size = sizeof(typeID);
+    AudioFileGetProperty(af, kAudioFilePropertyFileFormat, &size, &typeID);
+    AudioFileClose(af);
+    switch(typeID) {
+        case kAudioFileAIFFType: return @"aiff";
+        case kAudioFileAIFCType: return @"aifc";
+        case kAudioFileWAVEType: return @"wav";
+        case kAudioFileSoundDesigner2Type: return @"sd2";
+        case kAudioFileNextType: return @"nxt";
+        case kAudioFileMP3Type: return @"mp3";
+        case kAudioFileMP2Type: return @"mp2";
+        case kAudioFileMP1Type: return @"mp1";
+        case kAudioFileAC3Type: return @"ac3";
+        case kAudioFileAAC_ADTSType: return @"adts";
+        case kAudioFileMPEG4Type: return @"mp4";
+        case kAudioFileM4AType: return @"m4a";
+        case kAudioFileCAFType: return @"caf";
+        case kAudioFile3GPType: return @"3gp";
+        case kAudioFile3GP2Type: return @"3gp2";
+        case kAudioFileAMRType: return @"amr";
+        default:
+            return nil;
     }
 }
 
