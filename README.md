@@ -15,6 +15,8 @@ Don't forget to import the header:
 
     #import "AudioShareSDK.h"
 
+You also need to add the MobileCoreServices framework to your project.
+
 iOS 9 Support
 -------------
 Since iOS 9, apps must whitelist URL schemes to allow querying them with canOpenURL, which this SDK does.
