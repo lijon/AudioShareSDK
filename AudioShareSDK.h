@@ -4,7 +4,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface AudioShare : NSObject <UIAlertViewDelegate>
+@interface AudioShare : NSObject
 
 typedef void(^AudioShareImportBlock)(NSString *path);
 
