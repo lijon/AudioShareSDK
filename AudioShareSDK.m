@@ -16,6 +16,27 @@
     return a;
 }
 
++ (void)showAlertController:(UIAlertController*)alertController {
+    UIViewController *presentingViewController = [[[UIApplication sharedApplication] delegate] window].rootViewController;
+
+    while(presentingViewController.presentedViewController != nil) {
+        presentingViewController = presentingViewController.presentedViewController;
+    }
+
+    [presentingViewController presentViewController:alertController animated:YES completion:nil];
+}
+
++ (void)openURL:(NSURL *)URL {
+    UIApplication *application = [UIApplication sharedApplication];
+
+    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        [application openURL:URL options:@{}
+           completionHandler:nil];
+    } else {
+        [application openURL:URL];
+    }
+}
+
 - (NSString*)escapeString:(NSString*)string {
     NSString *s = [string stringByAddingPercentEncodingWithAllowedCharacters:
                    [NSCharacterSet URLQueryAllowedCharacterSet]];
@@ -32,23 +53,9 @@
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action)
-                                   {
-                                       NSLog(@"OK action");
-                                   }];
-        
+                                                         handler:^(UIAlertAction *action){}];
         [alertController addAction:okAction];
-        
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        [AudioShare showAlertController:alertController];
         
         return NO;
     }
@@ -75,36 +82,24 @@
         
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"Cancel action")
                                                                style:UIAlertActionStyleCancel
-                                                             handler:^(UIAlertAction *action)
-                                       {
-                                           NSLog(@"Cancel action");
-                                       }];
+                                                             handler:^(UIAlertAction *action){}];
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action)
                                    {
-                                       NSLog(@"OK action");
-                                       [self openScheme:@"http://kymatica.com/audioshare/download.php"];
+                                       [AudioShare openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
                                    }];
         
         [alertController addAction:cancelAction];
         [alertController addAction:okAction];
         
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        [AudioShare showAlertController:alertController];
         
         return NO;
     }
-    return [[UIApplication sharedApplication] openURL:asURL];
+    [AudioShare openURL:asURL];
+    return YES;
 }
 
 - (BOOL)addSoundFromURL:(NSURL*)url withName:(NSString*)name {
@@ -121,24 +116,12 @@
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action)
-                                   {
-                                       NSLog(@"OK action");
-                                   }];
+                                                         handler:^(UIAlertAction *action){}];
         
         [alertController addAction:okAction];
         
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
-        
+        [AudioShare showAlertController:alertController];
+
         return NO;
     }
     NSData *dataFile = [NSData dataWithContentsOfURL:[NSURL fileURLWithPath:path] options:NSDataReadingMappedIfSafe error:NULL];
@@ -175,24 +158,12 @@
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action)
-                                   {
-                                       NSLog(@"OK action");
-                                   }];
+                                                         handler:^(UIAlertAction *action){}];
         
         [alertController addAction:okAction];
         
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
-        
+        [AudioShare showAlertController:alertController];
+
         return NO;
     }
     NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audioshare.import://%@",callback]];
@@ -208,41 +179,27 @@
         
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"Cancel action")
                                                                style:UIAlertActionStyleCancel
-                                                             handler:^(UIAlertAction *action)
-                                       {
-                                           NSLog(@"Cancel action");
-                                       }];
+                                                             handler:^(UIAlertAction *action){}];
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action)
                                    {
-                                       NSLog(@"OK action");
-                                       //                                       [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
-                                       [self openScheme:@"http://kymatica.com/audioshare/download.php"];
+                                       [AudioShare openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
                                    }];
         
         [alertController addAction:cancelAction];
         [alertController addAction:okAction];
-        
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
+
+        [AudioShare showAlertController:alertController];
         
         if(hasAudio)
             asURL = [NSURL URLWithString:[callback stringByAppendingString:@"://PastedAudio"]];
         else
             return NO;
     }
-    
-    return [[UIApplication sharedApplication] openURL:asURL];
+    [AudioShare openURL:asURL];
+    return YES;
 }
 
 - (NSString*)writeSoundImport:(NSString*)filename {
@@ -294,24 +251,12 @@
             
             UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                                style:UIAlertActionStyleDefault
-                                                             handler:^(UIAlertAction *action)
-                                       {
-                                           NSLog(@"OK action");
-                                       }];
+                                                             handler:^(UIAlertAction *action){}];
             
             [alertController addAction:okAction];
             
-            id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-            if([rootViewController isKindOfClass:[UINavigationController class]])
-            {
-                rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-            }
-            if([rootViewController isKindOfClass:[UITabBarController class]])
-            {
-                rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-            }
-            [rootViewController presentViewController:alertController animated:YES completion:nil];
-            
+            [AudioShare showAlertController:alertController];
+
             return NO;
         }
         block(path);
@@ -337,24 +282,11 @@
         
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action)
-                                   {
-                                       NSLog(@"OK action");
-                                   }];
+                                                         handler:^(UIAlertAction *action){}];
         
         [alertController addAction:okAction];
         
-        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        if([rootViewController isKindOfClass:[UINavigationController class]])
-        {
-            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
-        }
-        if([rootViewController isKindOfClass:[UITabBarController class]])
-        {
-            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
-        }
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
-        
+        [AudioShare showAlertController:alertController];
     }
 }
 
@@ -402,21 +334,6 @@
         case kAudioFileAMRType: return @"amr";
         default:
             return nil;
-    }
-}
-
-- (void)openScheme:(NSString *)scheme {
-    UIApplication *application = [UIApplication sharedApplication];
-    NSURL *URL = [NSURL URLWithString:scheme];
-    
-    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-        [application openURL:URL options:@{}
-           completionHandler:^(BOOL success) {
-               NSLog(@"Open %@: %d",scheme,success);
-           }];
-    } else {
-        BOOL success = [application openURL:URL];
-        NSLog(@"Open %@: %d",scheme,success);
     }
 }
 
