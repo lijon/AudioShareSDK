@@ -29,6 +29,8 @@ For your app to work with this SDK on iOS 9, you *must* add the following entry 
         <string>audiosharecmd</string>
     </array>
 
+You *must* also add the `MobileCoreServices.framework` to your project. Otherwise, your build will fail with errors stating that `_kUTTypeAudio` is an undefined symbol.
+
 AudioShare SDK now uses ARC
 ---------------------------
 If your project is not ARC-enabled, you'll need to enable ARC for `AudioShareSDK.m`:

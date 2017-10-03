@@ -16,31 +16,39 @@
     return a;
 }
 
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    if(buttonIndex != alertView.cancelButtonIndex) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
-    }
-}
-
 - (NSString*)escapeString:(NSString*)string {
-    NSString *s = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                      NULL,
-                                                                      (CFStringRef)string,
-                                                                      NULL,
-                                                                      (CFStringRef)@"!*'\"();:@&=+$,/?%#[]% ",
-                                                                      CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding)));
+    NSString *s = [string stringByAddingPercentEncodingWithAllowedCharacters:
+                   [NSCharacterSet URLQueryAllowedCharacterSet]];
     return s;
 }
 
 - (BOOL)addSoundFromData:(NSData*)data withName:(NSString*)name {
     UIPasteboard *board = [UIPasteboard generalPasteboard];
     if (!data) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Sorry"
-                                                    message:@"Something went wrong. Could not export audio!"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-        [a show];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Sorry"
+                                                                                 message:@"Something went wrong. Could not export audio!"
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                   }];
+        
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
         
         return NO;
     }
@@ -56,16 +64,44 @@
         [items addObject:dict];
     }
     board.items = items;
-
+    
     name = [self escapeString:name];
     NSURL *asURL = [NSURL URLWithString:[NSString stringWithFormat:@"audiosharecmd://addFromPaste?%@",name]];
     if(![[UIApplication sharedApplication] canOpenURL:asURL]) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"AudioShare"
-                                                    message:@"Audio was copied to pasteboard and can now be pasted in other apps.\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."
-                                                   delegate:self
-                                          cancelButtonTitle:@"Cancel"
-                                          otherButtonTitles:@"Continue", nil];
-        [a show];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AudioShare"
+                                                                                 message:@"Audio was copied to pasteboard and can now be pasted in other apps.\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"Cancel action")
+                                                               style:UIAlertActionStyleCancel
+                                                             handler:^(UIAlertAction *action)
+                                       {
+                                           NSLog(@"Cancel action");
+                                       }];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                       [self openScheme:@"http://kymatica.com/audioshare/download.php"];
+                                   }];
+        
+        [alertController addAction:cancelAction];
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        
         return NO;
     }
     return [[UIApplication sharedApplication] openURL:asURL];
@@ -78,12 +114,30 @@
 
 - (BOOL)addSoundFromPath:(NSString*)path withName:(NSString*)name {
     if(![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Sorry"
-                                                    message:@"The file does not exist!"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-        [a show];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Sorry"
+                                                                                 message:@"The file does not exist!"
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                   }];
+        
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
         
         return NO;
     }
@@ -114,12 +168,30 @@
 - (BOOL)initiateSoundImport {
     NSString *callback = [self findCallbackScheme];
     if(!callback) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Missing callback URL"
-                                                    message:@"Hello developer. This app does not expose the needed appname.audioshare:// callback URL!"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-        [a show];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Missing callback URL"
+                                                                                 message:@"Hello developer. This app does not expose the needed appname.audioshare:// callback URL!"
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                   }];
+        
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
         
         return NO;
     }
@@ -129,45 +201,72 @@
         NSArray *typeArray = @[(NSString *) kUTTypeAudio];
         NSIndexSet *set = [board itemSetWithPasteboardTypes:typeArray];
         BOOL hasAudio = [board containsPasteboardTypes:typeArray inItemSet:set];
-
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"AudioShare"
-                                                    message:[hasAudio?@"Audio was pasted from pasteboard.":@"No audio in pasteboard." stringByAppendingString:@"\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."]
-                                                   delegate:self
-                                          cancelButtonTitle:@"Cancel"
-                                          otherButtonTitles:@"Continue", nil];
-        [a show];
-
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"AudioShare"
+                                                                                 message:[hasAudio?@"Audio was pasted from pasteboard.":@"No audio in pasteboard." stringByAppendingString:@"\n\nInstall AudioShare for easy storage and management of all your soundfiles, and more copy/paste functionality. You can get it on the App Store."]
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"Cancel action")
+                                                               style:UIAlertActionStyleCancel
+                                                             handler:^(UIAlertAction *action)
+                                       {
+                                           NSLog(@"Cancel action");
+                                       }];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                       //                                       [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://kymatica.com/audioshare/download.php"]];
+                                       [self openScheme:@"http://kymatica.com/audioshare/download.php"];
+                                   }];
+        
+        [alertController addAction:cancelAction];
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        
         if(hasAudio)
             asURL = [NSURL URLWithString:[callback stringByAppendingString:@"://PastedAudio"]];
         else
             return NO;
     }
-
+    
     return [[UIApplication sharedApplication] openURL:asURL];
 }
 
 - (NSString*)writeSoundImport:(NSString*)filename {
-	UIPasteboard *board = [UIPasteboard generalPasteboard];
-	NSArray *typeArray = [NSArray arrayWithObject:(NSString *) kUTTypeAudio];
-	NSIndexSet *set = [board itemSetWithPasteboardTypes:typeArray];
-	if (!set)
-		return nil;
-	NSArray *items = [board dataForPasteboardType:(NSString *) kUTTypeAudio inItemSet:set];
-	if (items) {
-		NSUInteger cnt = [items count];
-		if (!cnt)
-			return nil;
-		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
-        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
-		if (![[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil])
+    UIPasteboard *board = [UIPasteboard generalPasteboard];
+    NSArray *typeArray = [NSArray arrayWithObject:(NSString *) kUTTypeAudio];
+    NSIndexSet *set = [board itemSetWithPasteboardTypes:typeArray];
+    if (!set)
+        return nil;
+    NSArray *items = [board dataForPasteboardType:(NSString *) kUTTypeAudio inItemSet:set];
+    if (items) {
+        NSUInteger cnt = [items count];
+        if (!cnt)
             return nil;
-		NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
-		if (!handle)
-			return nil;
-		for (NSUInteger i = 0; i < cnt; i++)
-			[handle writeData:[items objectAtIndex:i]];
-		[handle closeFile];
-
+        NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+        if (![[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil])
+            return nil;
+        NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
+        if (!handle)
+            return nil;
+        for (NSUInteger i = 0; i < cnt; i++)
+            [handle writeData:[items objectAtIndex:i]];
+        [handle closeFile];
+        
         if(![[filename pathExtension] length]) {
             NSString *ext = [AudioShare findFileType:path];
             if(ext) {
@@ -176,9 +275,9 @@
                     path = newPath;
             }
         }
-
+        
         return path;
-	}
+    }
     return nil;
 }
 
@@ -188,12 +287,30 @@
         NSString *name = [url host];
         NSString *path = [self writeSoundImport:name];
         if(!path) {
-            UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Sorry"
-                                                        message:@"There was a problem trying to import a sound from AudioShare!"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-            [a show];
+            
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Sorry"
+                                                                                     message:@"There was a problem trying to import a sound from AudioShare!"
+                                                                              preferredStyle:UIAlertControllerStyleAlert];
+            
+            UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                               style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction *action)
+                                       {
+                                           NSLog(@"OK action");
+                                       }];
+            
+            [alertController addAction:okAction];
+            
+            id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+            if([rootViewController isKindOfClass:[UINavigationController class]])
+            {
+                rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+            }
+            if([rootViewController isKindOfClass:[UITabBarController class]])
+            {
+                rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+            }
+            [rootViewController presentViewController:alertController animated:YES completion:nil];
             
             return NO;
         }
@@ -213,12 +330,31 @@
     NSDictionary *info = bundle.infoDictionary;
     NSArray *list = info[@"LSApplicationQueriesSchemes"];
     if(!([list containsObject:@"audioshare.import"] && [list containsObject:@"audiosharecmd"])) {
-        UIAlertView *a = [[UIAlertView alloc] initWithTitle:@"Missing URL schemes in whitelist!"
-                                                    message:@"Hello developer. This app does not whitelist the AudioShare URL schemes, needed for iOS 9. See instructions at http://github.com/lijon/AudioShareSDK"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-        [a show];
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Missing URL schemes in whitelist!"
+                                                                                 message:@"Hello developer. This app does not whitelist the AudioShare URL schemes, needed for iOS 9. See instructions at http://github.com/lijon/AudioShareSDK"
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"OK action")
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction *action)
+                                   {
+                                       NSLog(@"OK action");
+                                   }];
+        
+        [alertController addAction:okAction];
+        
+        id rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        if([rootViewController isKindOfClass:[UINavigationController class]])
+        {
+            rootViewController = ((UINavigationController *)rootViewController).viewControllers.firstObject;
+        }
+        if([rootViewController isKindOfClass:[UITabBarController class]])
+        {
+            rootViewController = ((UITabBarController *)rootViewController).selectedViewController;
+        }
+        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        
     }
 }
 
@@ -266,6 +402,21 @@
         case kAudioFileAMRType: return @"amr";
         default:
             return nil;
+    }
+}
+
+- (void)openScheme:(NSString *)scheme {
+    UIApplication *application = [UIApplication sharedApplication];
+    NSURL *URL = [NSURL URLWithString:scheme];
+    
+    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        [application openURL:URL options:@{}
+           completionHandler:^(BOOL success) {
+               NSLog(@"Open %@: %d",scheme,success);
+           }];
+    } else {
+        BOOL success = [application openURL:URL];
+        NSLog(@"Open %@: %d",scheme,success);
     }
 }
 
